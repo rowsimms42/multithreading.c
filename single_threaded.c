@@ -4,19 +4,33 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <stdbool.h>
 #define MAX 1000
 // gcc -std=gnu99 -o t temp_cp2.c
-//./t < input1.txt
-
-//char buffer[MAX]; //shared resource
-//ssize_t res = getline(&line, &n, stdin);
+//./t < input3.txt
 
 struct holder {
-    char buff_in[80];
     char buffer[MAX];
+    char buffer_string[MAX];
     char new_string[MAX];
+    char share_buff[MAX];
     int count;
 };
+
+void output_data(struct holder* vars){
+    char* output = vars->new_string;
+    int i = 80;
+    int j = 0;
+    int counter = 0;
+
+    while (1){
+        printf ("%.*s\n", i, output + j);
+        counter++;
+        j = i * counter;
+        if ((i+j) > vars->count)
+            break;
+    }
+}
 
 void replace_plus_sign(struct holder* vars){
     char sym = '^';
@@ -27,9 +41,9 @@ void replace_plus_sign(struct holder* vars){
     int c = vars->count;
 
     while (i < c) {
-        char c = vars->buffer[i];
-        if (vars->buffer[i] == '+') {
-            char d = vars->buffer[i + 1];
+        char c = vars->share_buff[i];
+        if (vars->share_buff[i] == '+') {
+            char d = vars->share_buff[i + 1];
             if (d == '+') {
                 strncat(vars->new_string, ptr, 1);
                 i++;
@@ -47,47 +61,36 @@ void replace_plus_sign(struct holder* vars){
 
 void line_separator(struct holder* vars){
     int i = 0;
-    while (vars->buffer[i] != 0) {
-        if (vars->buffer[i] == '\n'){
-            vars->buffer[i] = ' ';
+    while (vars->share_buff[i] != 0) {
+        if (vars->share_buff[i] == '\n'){
+            vars->share_buff[i] = ' ';
         }
         i++;
     }
     vars->count = i;
 }
 
-int get_user_input(struct holder* vars){
-    fgets(vars->buffer, MAX, stdin);
+void get_user_input(struct holder* vars){
     char* stop = "STOP";
     int size = strlen(stop)+2;
     char new_str[size];
     strcpy(new_str, stop);
     strcat(new_str, "\n");
-    int i = 0;
 
-    while (vars->buffer[i]!=0){ //vars->buffer[i]!=0
+    while(1){
+        fgets(vars->buffer, MAX, stdin);
         if (strcmp(new_str, vars->buffer) == 0)
-            return 1;
-        i++;
+            break;
+        strncat(vars->share_buff, vars->buffer, strlen(vars->buffer));
     }
-    printf("i: %d\n", i);
-
-    return 0;
 }
 
 int main(int argc, char *argv[]){
     struct holder* vars = malloc(sizeof(struct holder));
-    while(1){
-        if (get_user_input(vars) == 1){
-            break;
-        }
-        //printf("%s", buffer);
-        line_separator(vars);
-        //printf("%i", counter);
-        replace_plus_sign(vars);
-        // output_lines(new_string, &counter);
-    }
-    printf("%s\n", vars->buffer);
-    printf("%s\n", vars->new_string);
+    get_user_input(vars);
+    line_separator(vars);
+    replace_plus_sign(vars);
+    output_data(vars);
+
     return 0;
 }
