@@ -5,7 +5,7 @@
 #include <math.h> // must link with -lm
 #include <string.h>
 
-/*gcc -std=gnu99 -pthread -o pipe consumer_pipeline.c*/
+/*gcc -std=gnu99 -pthread -o pipe pipeline.c*/
 /*./pipe < input3.txt (for file)*/
 /*./pipe (input through terminal)*/
 
