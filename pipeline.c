@@ -5,9 +5,10 @@
 #include <math.h> // must link with -lm
 #include <string.h>
 
-/*gcc -std=gnu99 -pthread -o pipe pipeline.c*/
+/*gcc -std=gnu99 -pthread -o pipe consumer_pipeline.c*/
 /*./pipe < input3.txt (for file)*/
 /*./pipe (input through terminal)*/
+/* run with valgrind --leak-check=full ./pipe */
 
 #define SIZE 1000
 #define NUM_ITEMS 49
@@ -121,16 +122,15 @@ void *replace_plus_sign(void *args)
     char *ptr = NULL;
     ptr = &sym;
     int i;
+    char* new_str = calloc(1000, sizeof(char));
 
     for (i = 0; i < NUM_ITEMS; i++) {
         int adj_counter = 0;
-        char *new_str = NULL;
 
         pthread_mutex_lock(&mutex_2);
         while (count_2 == 0)
             pthread_cond_wait(&full_2, &mutex_2);
         char* line = buffer_2[con_idx_2];
-        new_str = calloc(sizeof(line), sizeof(char));
         con_idx_2++;
         count_2--;
         pthread_mutex_unlock(&mutex_2);
@@ -167,11 +167,13 @@ void *replace_plus_sign(void *args)
         count_3++;
         pthread_cond_signal(&full_3);
         pthread_mutex_unlock(&mutex_3);
+        memset(new_str, 0, strlen(new_str));
 
         if (exiting > 0){
             break;
         }
     }
+    free(new_str);
     return NULL;
 }
 
@@ -180,6 +182,7 @@ void *write_output(void *args){
     int exiting = 0;
     int i;
     char* str_out = calloc(1000, sizeof(char));
+    char* ptr = str_out;
 
     for (i = 0; i < NUM_ITEMS; i++) {
         char* line = NULL;
@@ -209,6 +212,7 @@ void *write_output(void *args){
             break;
         }
     }
+    free(ptr);
     return NULL;
 }
 
