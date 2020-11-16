@@ -215,7 +215,7 @@ void *write_output(void *args){
         }
 
         /*output string and add offset to string*/
-        if (strlen(str_out)>79){
+        while (strlen(str_out)>79){
             printf("%.*s\n", 80, str_out);
             str_out = str_out+80;
         }
