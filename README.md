@@ -11,3 +11,11 @@ Thread replaces every pair of plus signs, i.e., "++", by a "^".
 Thread 4 writes the processed data to standard output as lines of exactly 80 characters.
 
 The four threads communicate with each other using the Producer-Consumer approach.
+
+-----------------------------------------------------------------------------------------
+
+Compile and Run: 
+
+gcc -std=gnu99 -pthread -o pipe consumer_pipeline.c
+
+./pipe
